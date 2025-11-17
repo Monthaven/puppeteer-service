@@ -4,8 +4,13 @@ const puppeteer = require('puppeteer');
 const app = express();
 
 app.get('/scrape', async (req, res) => {
-  const url = req.query.url;
+  let url = req.query.url;
   if (!url) return res.status(400).json({ error: 'Missing url' });
+  
+  // Add https:// if missing
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
   
   try {
     const browser = await puppeteer.launch({ 
@@ -13,8 +18,8 @@ app.get('/scrape', async (req, res) => {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',  // Add this
-        '--disable-gpu',             // Add this
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
       ]
     });
     
@@ -37,7 +42,7 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json({ images });
   } catch (error) {
-    console.error('Scraping error:', error);  // Add this
+    console.error('Scraping error:', error);
     res.status(500).json({ error: error.message });
   }
 });
