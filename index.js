@@ -10,11 +10,16 @@ app.get('/scrape', async (req, res) => {
   try {
     const browser = await puppeteer.launch({ 
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',  // Add this
+        '--disable-gpu',             // Add this
+      ]
     });
     
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 10000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
     
     const images = await page.evaluate(() => {
       const imgs = [];
@@ -32,6 +37,7 @@ app.get('/scrape', async (req, res) => {
     await browser.close();
     res.json({ images });
   } catch (error) {
+    console.error('Scraping error:', error);  // Add this
     res.status(500).json({ error: error.message });
   }
 });
