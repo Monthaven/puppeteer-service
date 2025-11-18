@@ -8,8 +8,11 @@ WORKDIR /usr/src/app
 # Copy package files first
 COPY package.json package-lock.json* ./
 
-# Install dependencies (uses the pre-installed Chromium)
-RUN npm install --production
+# Fix permissions and install dependencies (uses the pre-installed Chromium)
+USER root
+RUN chown -R pptruser:pptruser /usr/src/app
+USER pptruser
+RUN npm install --omit=dev --unsafe-perm
 
 # Copy the rest of the app
 COPY . .
